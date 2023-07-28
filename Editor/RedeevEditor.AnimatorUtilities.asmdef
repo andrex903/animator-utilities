@@ -1,0 +1,16 @@
+{
+    "name": "RedeevEditor.AnimatorUtilities",
+    "rootNamespace": "",
+    "references": [
+        "GUID:4981579c531e14d3eac3668fe57add83"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

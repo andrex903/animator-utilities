@@ -1,0 +1,16 @@
+{
+  "name": "com.redeev.animator-utilities",
+  "displayName": "Animator Utilities",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.redeev.utilities": "1.0.1"
+  },
+  "keywords": [
+    "Animator",
+    "Creator"
+  ],
+  "category": "tools",
+  "description": "A tool for the Animator controller",
+  "type": "tool"
+}

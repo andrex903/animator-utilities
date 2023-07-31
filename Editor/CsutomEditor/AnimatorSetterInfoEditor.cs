@@ -4,20 +4,20 @@ using UnityEngine;
 
 namespace RedeevEditor.Utilities
 {
-    [CustomEditor(typeof(AnimatorInfo))]
-    public class AnimatorInfoEditor : Editor
+    [CustomEditor(typeof(AnimatorSetterInfo))]
+    public class AnimatorSetterInfoEditor : Editor
     {
-        private AnimatorInfo m_AnimatorInfo;
+        private AnimatorSetterInfo m_AnimatorInfo;
 
         private void OnEnable()
         {
-            m_AnimatorInfo = (AnimatorInfo)target;
+            m_AnimatorInfo = (AnimatorSetterInfo)target;
         }
 
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
-            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AnimatorInfo.source)));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AnimatorSetterInfo.source)));
 
             EditorGUILayout.BeginVertical("HelpBox");
 
@@ -43,6 +43,7 @@ namespace RedeevEditor.Utilities
                 if (m_AnimatorInfo.bindings.Count == 0 || EditorUtility.DisplayDialog("Warning", "Are you sure to overwrite?", "Continue", "Cancel"))
                 {
                     m_AnimatorInfo.LoadAnimations();
+                    EditorUtility.SetDirty(m_AnimatorInfo);
                 }
             }
 

@@ -144,7 +144,7 @@ namespace RedeevEditor.Utilities
                 destination.StateTransition.interruptionSource = source.StateTransition.interruptionSource;
                 destination.StateTransition.offset = source.StateTransition.offset;
                 destination.StateTransition.orderedInterruption = source.StateTransition.orderedInterruption;
-            }     
+            }
         }
 
         public static List<ChildAnimatorState> GetAllStates(RuntimeAnimatorController controller)
@@ -179,6 +179,61 @@ namespace RedeevEditor.Utilities
                 }
             }
             return animationClips.ToArray();
+        }
+
+        [MenuItem("Assets/Redeev/Fast Animator Setup", validate = true)]
+        private static bool FastAnimatorSetupValidation()
+        {
+            if (Selection.objects.Length == 1)
+            {
+                return Selection.objects[0].GetType() == typeof(AnimatorController);
+            }
+            return false;
+        }
+
+        [MenuItem("Assets/Redeev/Fast Animator Setup")]
+        private static void FastAnimatorSetup()
+        {
+            if (!EditorUtility.DisplayDialog("Warning", "This will delete all the current parameters and transitions", "Continue", "Cancel")) return;
+
+            var controller = Selection.objects[0] as AnimatorController;
+
+            controller.parameters = new AnimatorControllerParameter[0];
+            controller.layers[0].stateMachine.anyStateTransitions = new AnimatorStateTransition[0];
+
+            var childStates = controller.layers[0].stateMachine.states;
+            controller.layers[0].stateMachine.entryPosition = new Vector3(400f, -(childStates.Length / 2 + 1) * 50f, 0f);
+            for (int i = 0; i < childStates.Length; i++)
+            {
+                var state = childStates[i];
+                state.position = new(400f, 50f * (i - childStates.Length / 2), 0f);
+                childStates[i] = state;
+            }
+            controller.layers[0].stateMachine.states = childStates;
+
+            AnimatorState idleState = null;
+
+            foreach (var state in controller.layers[0].stateMachine.states)
+            {
+                if (state.state.name.Contains("Idle")) idleState = state.state;
+                controller.AddParameter(state.state.name, AnimatorControllerParameterType.Trigger);
+                var transition = controller.layers[0].stateMachine.AddAnyStateTransition(state.state);
+                transition.AddCondition(AnimatorConditionMode.If, 0, state.state.name);
+                transition.canTransitionToSelf = false;
+                transition.duration = 0f;
+            }
+
+            if (idleState != null)
+            {
+                foreach (var state in controller.layers[0].stateMachine.states)
+                {
+                    if (state.state == idleState || state.state.motion.isLooping) continue;
+                    var transition = state.state.AddTransition(idleState);
+                    transition.hasExitTime = true;
+                    transition.exitTime = 1f;
+                    transition.duration = 0f;
+                }
+            }
         }
     }
 }

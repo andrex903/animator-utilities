@@ -7,23 +7,23 @@ using Object = UnityEngine.Object;
 
 namespace RedeevEditor.Utilities
 {
-    public class AnimatorUtilityEditorWindow : EditorWindow
+    public class AnimatorSetterEditorWindow : EditorWindow
     {
-        private AnimatorInfo sourceInfo;
+        private AnimatorSetterInfo sourceInfo;
         private RuntimeAnimatorController destination;
         private List<Object> animations = new();
 
-        [MenuItem("Tools/Utilities/Animator")]
+        [MenuItem("Tools/Animator Setter")]
         public static void ShowWindow()
         {
-            GetWindow<AnimatorUtilityEditorWindow>("Animator Utility");
+            GetWindow<AnimatorSetterEditorWindow>("Animator Setter");
         }
 
         private void OnGUI()
         {
             EditorGUILayout.BeginVertical("Helpbox");
 
-            sourceInfo = (AnimatorInfo)EditorGUILayout.ObjectField("Source", sourceInfo, typeof(AnimatorInfo), false);
+            sourceInfo = (AnimatorSetterInfo)EditorGUILayout.ObjectField("Source", sourceInfo, typeof(AnimatorSetterInfo), false);
             destination = (RuntimeAnimatorController)EditorGUILayout.ObjectField("Destination", destination, typeof(RuntimeAnimatorController), false);
 
             if (!sourceInfo || !sourceInfo.source || !destination)
@@ -165,7 +165,7 @@ namespace RedeevEditor.Utilities
                 var clips = AnimatorUtility.GetAnimationClipsFromImporter(AssetDatabase.GetAssetPath(animations[i]));
                 foreach (var clip in clips)
                 {
-                    if (AnimatorInfo.Validate(clip.name, tag, excluded)) return clip;
+                    if (AnimatorSetterInfo.Validate(clip.name, tag, excluded)) return clip;
                 }
             }
             return null;

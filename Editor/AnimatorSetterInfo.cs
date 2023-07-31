@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace RedeevEditor.Utilities
 {
-    [CreateAssetMenu(menuName = "Redeev/Animator/New Animator Info")]
-    public class AnimatorInfo : ScriptableObject
+    [CreateAssetMenu(menuName = "Redeev/Animator Setter/Info")]
+    public class AnimatorSetterInfo : ScriptableObject
     {
         public RuntimeAnimatorController source;
         public List<AnimationBinding> bindings = new();

@@ -96,6 +96,10 @@ namespace RedeevEditor.Utilities
                 }
 
                 EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button(new GUIContent("Overwrite"), GUILayout.Height(20f)))
+                {
+                    Overwrite();
+                }
                 if (GUILayout.Button(new GUIContent("Fill"), GUILayout.Height(20f)))
                 {
                     Fill();
@@ -132,7 +136,7 @@ namespace RedeevEditor.Utilities
             EditorUtility.SetDirty(destination);
         }
 
-        private void Fill()
+        private void Overwrite()
         {
             var states = AnimatorUtility.GetAllStates(destination);
 
@@ -153,6 +157,37 @@ namespace RedeevEditor.Utilities
                     else
                     {
                         state.state.motion = GetMotion(binding.tags[0], binding.excluded);
+                    }
+                }
+            }
+            EditorUtility.SetDirty(destination);
+        }
+
+        private void Fill()
+        {
+            var states = AnimatorUtility.GetAllStates(destination);
+
+            foreach (var state in states)
+            {
+                if (sourceInfo.TryGetBinding(state.state.name, out var binding))
+                {
+                    if (state.state.motion is BlendTree tree)
+                    {
+                        if (tree.children.Length == 0)
+                        {
+                            ChildMotion[] motions = new ChildMotion[binding.tags.Count];
+
+                            for (int i = 0; i < binding.tags.Count; i++)
+                            {
+                                motions[i].motion = GetMotion(binding.tags[i], binding.excluded);
+                                motions[i].timeScale = 1f;
+                            }
+                            tree.children = motions;
+                        }
+                    }
+                    else
+                    {
+                        if (state.state.motion == null) state.state.motion = GetMotion(binding.tags[0], binding.excluded);
                     }
                 }
             }

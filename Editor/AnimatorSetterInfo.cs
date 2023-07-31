@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.Animations;
 using UnityEngine;
 
@@ -44,6 +45,8 @@ namespace RedeevEditor.Utilities
                     tags = tags
                 });
             }
+
+            bindings = bindings.OrderBy(x => x.stateName).ToList();
         }
 
         public static bool Validate(string clipName, string tag, string excluded)

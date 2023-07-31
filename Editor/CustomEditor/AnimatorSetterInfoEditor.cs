@@ -16,6 +16,7 @@ namespace RedeevEditor.Utilities
 
         public override void OnInspectorGUI()
         {
+            EditorGUI.BeginChangeCheck();
             serializedObject.Update();
             EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(AnimatorSetterInfo.source)));
 
@@ -42,12 +43,15 @@ namespace RedeevEditor.Utilities
             {
                 if (m_AnimatorInfo.bindings.Count == 0 || EditorUtility.DisplayDialog("Warning", "Are you sure to overwrite?", "Continue", "Cancel"))
                 {
-                    m_AnimatorInfo.LoadAnimations();
-                    EditorUtility.SetDirty(m_AnimatorInfo);
+                    m_AnimatorInfo.LoadAnimations();                    
                 }
             }
 
             serializedObject.ApplyModifiedProperties();
+            if (EditorGUI.EndChangeCheck())
+            {
+                EditorUtility.SetDirty(m_AnimatorInfo);
+            }
         }
     }
 }

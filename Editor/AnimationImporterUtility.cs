@@ -68,7 +68,7 @@ namespace RedeevEditor.Utilities
         private static void ForEachClips(ModelImporter modelImporter, Action<ModelImporterClipAnimation> callback)
         {
             ModelImporterClipAnimation[] clipAnimations = modelImporter.clipAnimations;
-
+            if (clipAnimations.Length == 0) clipAnimations = modelImporter.defaultClipAnimations;
             for (int i = 0; i < clipAnimations.Length; i++)
             {
                 callback?.Invoke(clipAnimations[i]);

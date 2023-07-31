@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
@@ -160,9 +161,10 @@ namespace RedeevEditor.Utilities
 
         private Motion GetMotion(string tag, string excluded)
         {
-            for (int i = 0; i < animations.Count; i++)
+            var temp = animations.OrderBy(x => Random.value).ToList();
+            for (int i = 0; i < temp.Count; i++)
             {
-                var clips = AnimatorUtility.GetAnimationClipsFromImporter(AssetDatabase.GetAssetPath(animations[i]));
+                var clips = AnimatorUtility.GetAnimationClipsFromImporter(AssetDatabase.GetAssetPath(temp[i]));
                 foreach (var clip in clips)
                 {
                     if (AnimatorSetterInfo.Validate(clip.name, tag, excluded)) return clip;

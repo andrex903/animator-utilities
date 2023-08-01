@@ -11,7 +11,7 @@ namespace RedeevEditor.Utilities
     public class AnimatorSetterEditorWindow : EditorWindow
     {
         private AnimatorSetterInfo sourceInfo;
-        private List<RuntimeAnimatorController> destinations;
+        private List<RuntimeAnimatorController> destinations = new();
         private List<Object> animations = new();
 
         [MenuItem("Tools/Animator Setter")]

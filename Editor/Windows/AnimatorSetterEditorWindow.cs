@@ -11,7 +11,7 @@ namespace RedeevEditor.Utilities
     public class AnimatorSetterEditorWindow : EditorWindow
     {
         private AnimatorSetterInfo sourceInfo;
-        private RuntimeAnimatorController destination;
+        private List<RuntimeAnimatorController> destinations;
         private List<Object> animations = new();
 
         [MenuItem("Tools/Animator Setter")]
@@ -25,9 +25,9 @@ namespace RedeevEditor.Utilities
             EditorGUILayout.BeginVertical("Helpbox");
 
             sourceInfo = (AnimatorSetterInfo)EditorGUILayout.ObjectField("Source", sourceInfo, typeof(AnimatorSetterInfo), false);
-            destination = (RuntimeAnimatorController)EditorGUILayout.ObjectField("Destination", destination, typeof(RuntimeAnimatorController), false);
+            DestinationsGUI();
 
-            if (!sourceInfo || !sourceInfo.source || !destination)
+            if (!sourceInfo || !sourceInfo.source || destinations.Count == 0)
             {
                 EditorGUILayout.EndVertical();
                 return;
@@ -36,6 +36,49 @@ namespace RedeevEditor.Utilities
             SyncGUI();
 
             AnimationsGUI();
+
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DestinationsGUI()
+        {
+            Rect rect = EditorGUILayout.BeginVertical("Helpbox");
+
+            EditorGUILayout.BeginHorizontal("Box");
+            EditorGUILayout.LabelField("Destinations", EditorStyles.boldLabel);
+            EditorGUILayout.EndHorizontal();
+
+            if (destinations.Count == 0)
+            {
+                EditorGUILayout.LabelField("Drag controllers here", EditorStyles.centeredGreyMiniLabel);
+            }
+            else
+            {
+                for (int i = 0; i < destinations.Count; i++)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    destinations[i] = (RuntimeAnimatorController)EditorGUILayout.ObjectField(destinations[i], typeof(RuntimeAnimatorController), false);
+                    if (EditorUtilityGUI.IconButton("d_TreeEditor.Trash", 25f, 20f))
+                    {
+                        destinations.RemoveAt(i);
+                        GUIUtility.ExitGUI();
+                        return;
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button(new GUIContent("Clear"), GUILayout.Height(20f)))
+                {
+                    destinations.Clear();
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+
+            EditorUtilityGUI.DropAreaGUI(rect, obj =>
+            {
+                if (obj is RuntimeAnimatorController controller) destinations.Add(controller);
+            });
 
             EditorGUILayout.EndVertical();
         }
@@ -49,19 +92,19 @@ namespace RedeevEditor.Utilities
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal("Box");
-            if (GUILayout.Button(new GUIContent("Sync States"), GUILayout.Height(20f)))
-            {
-                SyncStates();
-            }
+            //if (GUILayout.Button(new GUIContent("Sync States"), GUILayout.Height(20f)))
+            //{
+            //    foreach (var destination in destinations) SyncStates(destination);
+            //}
 
             if (GUILayout.Button(new GUIContent("Sync Parameters"), GUILayout.Height(20f)))
             {
-                SyncParameters();
+                foreach (var destination in destinations) SyncParameters(destination);
             }
 
             if (GUILayout.Button(new GUIContent("Sync Transitions"), GUILayout.Height(20f)))
             {
-                SyncTransitions();
+                foreach (var destination in destinations) SyncTransitions(destination);
             }
             EditorGUILayout.EndHorizontal();
 
@@ -97,12 +140,12 @@ namespace RedeevEditor.Utilities
 
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button(new GUIContent("Overwrite"), GUILayout.Height(20f)))
-                {
-                    Overwrite();
+                { 
+                    foreach (var destination in destinations) Overwrite(destination);                   
                 }
                 if (GUILayout.Button(new GUIContent("Fill"), GUILayout.Height(20f)))
                 {
-                    Fill();
+                    foreach (var destination in destinations) Fill(destination);
                 }
                 if (GUILayout.Button(new GUIContent("Clear"), GUILayout.Height(20f)))
                 {
@@ -119,7 +162,7 @@ namespace RedeevEditor.Utilities
             EditorGUILayout.EndVertical();
         }
 
-        private void SyncTransitions()
+        private void SyncTransitions(RuntimeAnimatorController destination)
         {
             var originalTransitionsInfo = AnimatorUtility.GetAllTransitions(sourceInfo.source);
             var destinationTransitionsInfo = AnimatorUtility.GetAllTransitions(destination);
@@ -136,7 +179,7 @@ namespace RedeevEditor.Utilities
             EditorUtility.SetDirty(destination);
         }
 
-        private void Overwrite()
+        private void Overwrite(RuntimeAnimatorController destination)
         {
             var states = AnimatorUtility.GetAllStates(destination);
 
@@ -163,7 +206,7 @@ namespace RedeevEditor.Utilities
             EditorUtility.SetDirty(destination);
         }
 
-        private void Fill()
+        private void Fill(RuntimeAnimatorController destination)
         {
             var states = AnimatorUtility.GetAllStates(destination);
 
@@ -208,7 +251,7 @@ namespace RedeevEditor.Utilities
             return null;
         }
 
-        private void SyncStates()
+        private void SyncStates(RuntimeAnimatorController destination)
         {
             var originalStates = AnimatorUtility.GetAllStates(sourceInfo.source);
             var destinationStates = AnimatorUtility.GetAllStates(destination);
@@ -222,14 +265,14 @@ namespace RedeevEditor.Utilities
             }
         }
 
-        private void SyncParameters()
+        private void SyncParameters(RuntimeAnimatorController destination)
         {
             var original = sourceInfo.source as AnimatorController;
-            var destination = this.destination as AnimatorController;
+            var controller = destination as AnimatorController;
 
             foreach (var parameter in original.parameters)
             {
-                if (!HasParameter(parameter.name, destination)) destination.AddParameter(parameter);
+                if (!HasParameter(parameter.name, controller)) controller.AddParameter(parameter);
             }
         }
 

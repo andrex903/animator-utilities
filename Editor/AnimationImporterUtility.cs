@@ -19,6 +19,9 @@ namespace RedeevEditor.Utilities
         [MenuItem("Assets/Redeev/Animation Importer/Set Loops", validate = true)]
         private static bool SetLoopsValidation() => IsSelectionFBX();
 
+        [MenuItem("Assets/Redeev/Animation Importer/Remove Materials", validate = true)]
+        private static bool RemoveMaterialsValidation() => IsSelectionFBX();
+
         public static bool IsSelectionFBX()
         {
             if (Selection.objects.Length == 0) return false;
@@ -120,7 +123,16 @@ namespace RedeevEditor.Utilities
                     }
                 });
             });
-        }        
+        }
+
+        [MenuItem("Assets/Redeev/Animation Importer/Remove Materials")]
+        private static void RemoveMaterials()
+        {
+            ForEachModelSelected(modelImporter =>
+            {
+                modelImporter.materialImportMode = ModelImporterMaterialImportMode.None;
+            });
+        }
     }
 }
 #endif

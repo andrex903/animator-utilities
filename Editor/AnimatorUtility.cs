@@ -51,17 +51,7 @@ namespace RedeevEditor.Utilities
         {
             public AnimatorState state;
             public Vector3 position;
-            public int layer;
-
-            public AnimatorState GetStateClone()
-            {
-                if (!state) return null;
-
-                var clone = Object.Instantiate(state);
-                clone.name = state.name;
-                clone.transitions = new AnimatorStateTransition[0];
-                return clone;
-            }
+            public int layer;           
         }
 
         public static List<AnimatorTransitionInfo> GetAllTransitions(RuntimeAnimatorController controller)

@@ -199,10 +199,10 @@ namespace RedeevEditor.Utilities
                         if (transitionInfo.StateTransition.destinationState)
                         {
                             var state = destinationStatesInfo.Find(x => x.state.name == transitionInfo.StateTransition.destinationState.name);
-                            
+
                             var transition = machine.AddAnyStateTransition(state.state);
 
-                            AnimatorUtility.CloneTransition(transitionInfo, transition);                           
+                            AnimatorUtility.CloneTransition(transitionInfo, transition);
                         }
 
                     }
@@ -296,13 +296,13 @@ namespace RedeevEditor.Utilities
         {
             var originalStatesInfo = AnimatorUtility.GetAllStatesInfo(sourceInfo.source);
             var destinationStatesInfo = AnimatorUtility.GetAllStatesInfo(destination);
-            var controller = destination as AnimatorController;
+            var controller = destination as AnimatorController;           
 
             foreach (var info in originalStatesInfo)
             {
                 if (destinationStatesInfo.Find(x => x.state.name == info.state.name).state == null)
                 {
-                    controller.layers[info.layer].stateMachine.AddState(info.GetStateClone(), info.position);
+                    controller.layers[info.layer].stateMachine.AddState(info.state.name, info.position);
                 }
             }
 

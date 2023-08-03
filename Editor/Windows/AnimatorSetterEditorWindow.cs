@@ -194,7 +194,18 @@ namespace RedeevEditor.Utilities
                     }
                     else if (transitionInfo.type == AnimatorUtility.TransitionSourceType.AnyState)
                     {
-
+                        var stateInfo = destinationStatesInfo.Find(x => x.state.name == transitionInfo.source.name);
+                        if (stateInfo.state != null)
+                        {
+                            var transition = new AnimatorStateTransition();
+                            AnimatorUtility.CloneTransition(transitionInfo, transition);
+                            if (transitionInfo.StateTransition.destinationState)
+                            {
+                                var state = destinationStatesInfo.Find(x => x.state.name == transitionInfo.StateTransition.destinationState.name);
+                                transition.destinationState = state.state;
+                            }
+                            stateInfo.state.AddTransition(transition);
+                        }
                     }
                     else if (transitionInfo.type == AnimatorUtility.TransitionSourceType.StateMachine)
                     {

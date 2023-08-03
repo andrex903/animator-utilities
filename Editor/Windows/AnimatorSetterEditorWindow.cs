@@ -92,10 +92,10 @@ namespace RedeevEditor.Utilities
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal("Box");
-            //if (GUILayout.Button(new GUIContent("Sync States"), GUILayout.Height(20f)))
-            //{
-            //    foreach (var destination in destinations) SyncStates(destination);
-            //}
+            if (GUILayout.Button(new GUIContent("Sync States"), GUILayout.Height(20f)))
+            {
+                foreach (var destination in destinations) SyncStates(destination);
+            }
 
             if (GUILayout.Button(new GUIContent("Sync Parameters"), GUILayout.Height(20f)))
             {
@@ -140,8 +140,8 @@ namespace RedeevEditor.Utilities
 
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button(new GUIContent("Overwrite"), GUILayout.Height(20f)))
-                { 
-                    foreach (var destination in destinations) Overwrite(destination);                   
+                {
+                    foreach (var destination in destinations) Overwrite(destination);
                 }
                 if (GUILayout.Button(new GUIContent("Fill"), GUILayout.Height(20f)))
                 {
@@ -166,13 +166,44 @@ namespace RedeevEditor.Utilities
         {
             var originalTransitionsInfo = AnimatorUtility.GetAllTransitions(sourceInfo.source);
             var destinationTransitionsInfo = AnimatorUtility.GetAllTransitions(destination);
+            var destinationStatesInfo = AnimatorUtility.GetAllStatesInfo(destination);
 
-            foreach (var transitionInfo in destinationTransitionsInfo)
+            foreach (var transitionInfo in originalTransitionsInfo)
             {
-                var originalTransition = originalTransitionsInfo.Find(x => x.Hash == transitionInfo.Hash);
-                if (originalTransition.transition)
+                var destinationTransition = destinationTransitionsInfo.Find(x => x.Hash == transitionInfo.Hash);
+                if (destinationTransition.transition)
                 {
-                    AnimatorUtility.CloneTransition(originalTransition, transitionInfo);
+                    AnimatorUtility.CloneTransition(transitionInfo, destinationTransition);
+                }
+                else
+                {
+                    if (transitionInfo.type == AnimatorUtility.TransitionSourceType.NormalState)
+                    {
+                        var stateInfo = destinationStatesInfo.Find(x => x.state.name == transitionInfo.source.name);
+                        if (stateInfo.state != null)
+                        {
+                            var transition = new AnimatorStateTransition();
+                            AnimatorUtility.CloneTransition(transitionInfo, transition);
+                            if (transitionInfo.StateTransition.destinationState)
+                            {
+                                var state = destinationStatesInfo.Find(x => x.state.name == transitionInfo.StateTransition.destinationState.name);
+                                transition.destinationState = state.state;
+                            }
+                            stateInfo.state.AddTransition(transition);
+                        }
+                    }
+                    else if (transitionInfo.type == AnimatorUtility.TransitionSourceType.AnyState)
+                    {
+
+                    }
+                    else if (transitionInfo.type == AnimatorUtility.TransitionSourceType.StateMachine)
+                    {
+
+                    }
+                    else if (transitionInfo.type == AnimatorUtility.TransitionSourceType.EntryState)
+                    {
+
+                    }
                 }
             }
 
@@ -181,13 +212,13 @@ namespace RedeevEditor.Utilities
 
         private void Overwrite(RuntimeAnimatorController destination)
         {
-            var states = AnimatorUtility.GetAllStates(destination);
+            var infos = AnimatorUtility.GetAllStatesInfo(destination);
 
-            foreach (var state in states)
+            foreach (var info in infos)
             {
-                if (sourceInfo.TryGetBinding(state.state.name, out var binding))
+                if (sourceInfo.TryGetBinding(info.state.name, out var binding))
                 {
-                    if (state.state.motion is BlendTree tree)
+                    if (info.state.motion is BlendTree tree)
                     {
                         ChildMotion[] motions = new ChildMotion[binding.tags.Count];
                         for (int i = 0; i < binding.tags.Count; i++)
@@ -199,7 +230,7 @@ namespace RedeevEditor.Utilities
                     }
                     else
                     {
-                        state.state.motion = GetMotion(binding.tags[0], binding.excluded);
+                        info.state.motion = GetMotion(binding.tags[0], binding.excluded);
                     }
                 }
             }
@@ -208,13 +239,13 @@ namespace RedeevEditor.Utilities
 
         private void Fill(RuntimeAnimatorController destination)
         {
-            var states = AnimatorUtility.GetAllStates(destination);
+            var infos = AnimatorUtility.GetAllStatesInfo(destination);
 
-            foreach (var state in states)
+            foreach (var info in infos)
             {
-                if (sourceInfo.TryGetBinding(state.state.name, out var binding))
+                if (sourceInfo.TryGetBinding(info.state.name, out var binding))
                 {
-                    if (state.state.motion is BlendTree tree)
+                    if (info.state.motion is BlendTree tree)
                     {
                         if (tree.children.Length == 0)
                         {
@@ -230,7 +261,7 @@ namespace RedeevEditor.Utilities
                     }
                     else
                     {
-                        if (state.state.motion == null) state.state.motion = GetMotion(binding.tags[0], binding.excluded);
+                        if (info.state.motion == null) info.state.motion = GetMotion(binding.tags[0], binding.excluded);
                     }
                 }
             }
@@ -253,16 +284,19 @@ namespace RedeevEditor.Utilities
 
         private void SyncStates(RuntimeAnimatorController destination)
         {
-            var originalStates = AnimatorUtility.GetAllStates(sourceInfo.source);
-            var destinationStates = AnimatorUtility.GetAllStates(destination);
+            var originalStatesInfo = AnimatorUtility.GetAllStatesInfo(sourceInfo.source);
+            var destinationStatesInfo = AnimatorUtility.GetAllStatesInfo(destination);
+            var controller = destination as AnimatorController;
 
-            foreach (var state in originalStates)
+            foreach (var info in originalStatesInfo)
             {
-                if (destinationStates.Find(x => x.state.name == state.state.name).state == null)
+                if (destinationStatesInfo.Find(x => x.state.name == info.state.name).state == null)
                 {
-
+                    controller.layers[info.layer].stateMachine.AddState(info.GetStateClone(), info.position);
                 }
             }
+
+            EditorUtility.SetDirty(destination);
         }
 
         private void SyncParameters(RuntimeAnimatorController destination)

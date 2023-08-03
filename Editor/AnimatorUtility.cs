@@ -33,10 +33,10 @@ namespace RedeevEditor.Utilities
             {
                 StringBuilder stringBuilder = new();
                 stringBuilder.Append(type);
-                stringBuilder.Append(source);
-                stringBuilder.Append(sourceStateMachine);
-                stringBuilder.Append(transition.destinationState);
-                stringBuilder.Append(transition.destinationStateMachine);
+                if (source) stringBuilder.Append(source.name);
+                if (sourceStateMachine) stringBuilder.Append(sourceStateMachine.name);
+                if (transition.destinationState) stringBuilder.Append(transition.destinationState.name);
+                if (transition.destinationStateMachine) stringBuilder.Append(transition.destinationStateMachine.name);
                 stringBuilder.Append(orderInSrcTransitions);
 
                 using MD5 md5 = MD5.Create();
@@ -44,6 +44,23 @@ namespace RedeevEditor.Utilities
                 stringBuilder.Clear();
                 foreach (byte b in hashBytes) stringBuilder.Append(b.ToString("x2"));
                 return stringBuilder.ToString();
+            }
+        }
+
+        public struct AnimatorStateInfo
+        {
+            public AnimatorState state;
+            public Vector3 position;
+            public int layer;
+
+            public AnimatorState GetStateClone()
+            {
+                if (!state) return null;
+
+                var clone = Object.Instantiate(state);
+                clone.name = state.name;
+                clone.transitions = new AnimatorStateTransition[0];
+                return clone;
             }
         }
 
@@ -122,6 +139,11 @@ namespace RedeevEditor.Utilities
         {
             if (source.type != destination.type) return;
 
+            CloneTransition(source, destination.transition);
+        }
+
+        public static void CloneTransition(AnimatorTransitionInfo source, AnimatorTransitionBase destination)
+        {
             var conditions = new AnimatorCondition[source.transition.conditions.Length];
             for (int i = 0; i < conditions.Length; i++)
             {
@@ -132,35 +154,37 @@ namespace RedeevEditor.Utilities
                     threshold = source.transition.conditions[i].threshold
                 };
             }
-            destination.transition.conditions = conditions;
+            destination.conditions = conditions;
 
-            if (source.StateTransition)
+            if (source.StateTransition && destination is AnimatorStateTransition stateTransition)
             {
-                destination.StateTransition.canTransitionToSelf = source.StateTransition.canTransitionToSelf;
-                destination.StateTransition.duration = source.StateTransition.duration;
-                destination.StateTransition.exitTime = source.StateTransition.exitTime;
-                destination.StateTransition.hasExitTime = source.StateTransition.hasExitTime;
-                destination.StateTransition.hasFixedDuration = source.StateTransition.hasFixedDuration;
-                destination.StateTransition.interruptionSource = source.StateTransition.interruptionSource;
-                destination.StateTransition.offset = source.StateTransition.offset;
-                destination.StateTransition.orderedInterruption = source.StateTransition.orderedInterruption;
+                stateTransition.canTransitionToSelf = source.StateTransition.canTransitionToSelf;
+                stateTransition.duration = source.StateTransition.duration;
+                stateTransition.exitTime = source.StateTransition.exitTime;
+                stateTransition.hasExitTime = source.StateTransition.hasExitTime;
+                stateTransition.hasFixedDuration = source.StateTransition.hasFixedDuration;
+                stateTransition.interruptionSource = source.StateTransition.interruptionSource;
+                stateTransition.offset = source.StateTransition.offset;
+                stateTransition.orderedInterruption = source.StateTransition.orderedInterruption;
             }
         }
 
-        public static List<ChildAnimatorState> GetAllStates(RuntimeAnimatorController controller)
+        public static List<AnimatorStateInfo> GetAllStatesInfo(RuntimeAnimatorController controller)
         {
-            List<ChildAnimatorState> states = new();
-            foreach (var layer in (controller as AnimatorController).layers)
+            var animatorController = controller as AnimatorController;
+
+            List<AnimatorStateInfo> states = new();
+            for (int i = 0; i < animatorController.layers.Length; i++)
             {
-                foreach (var state in layer.stateMachine.states)
+                foreach (var state in animatorController.layers[i].stateMachine.states)
                 {
-                    states.Add(state);
+                    states.Add(new() { state = state.state, position = state.position, layer = i });
                 }
-                foreach (var subState in layer.stateMachine.stateMachines)
+                foreach (var subState in animatorController.layers[i].stateMachine.stateMachines)
                 {
                     foreach (var state in subState.stateMachine.states)
                     {
-                        states.Add(state);
+                        states.Add(new() { state = state.state, position = state.position, layer = i });
                     }
                 }
             }

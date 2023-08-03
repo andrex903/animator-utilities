@@ -23,25 +23,25 @@ namespace RedeevEditor.Utilities
 
         public void LoadAnimations()
         {
-            var states = AnimatorUtility.GetAllStates(source);
+            var infos = AnimatorUtility.GetAllStatesInfo(source);
 
             bindings.Clear();
-            for (int i = 0; i < states.Count; i++)
+            for (int i = 0; i < infos.Count; i++)
             {
                 List<string> tags = new();
 
-                if (states[i].state.motion is BlendTree blendTree)
+                if (infos[i].state.motion is BlendTree blendTree)
                 {
                     foreach (var child in blendTree.children)
                     {
                         tags.Add(string.Empty);
                     }
                 }
-                else tags.Add(states[i].state.name);
+                else tags.Add(infos[i].state.name);
 
                 bindings.Add(new AnimationBinding
                 {
-                    stateName = states[i].state.name,
+                    stateName = infos[i].state.name,
                     tags = tags
                 });
             }

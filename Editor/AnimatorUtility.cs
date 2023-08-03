@@ -83,6 +83,7 @@ namespace RedeevEditor.Utilities
                 AnimatorTransitionInfo info = new()
                 {
                     type = TransitionSourceType.AnyState,
+                    sourceStateMachine = stateMachine,
                     transition = stateMachine.anyStateTransitions[i],
                     orderInSrcTransitions = i
                 };
@@ -95,6 +96,7 @@ namespace RedeevEditor.Utilities
                 {
                     type = TransitionSourceType.EntryState,
                     transition = stateMachine.entryTransitions[i],
+                    sourceStateMachine = stateMachine,
                     orderInSrcTransitions = i
                 };
                 transitions.Add(info);
@@ -189,6 +191,22 @@ namespace RedeevEditor.Utilities
                 }
             }
             return states;
+        }
+
+        public static AnimatorStateMachine GetStateMachine(RuntimeAnimatorController controller, string name)
+        {
+            var animatorController = controller as AnimatorController;
+
+            foreach (var layer in animatorController.layers)
+            {
+                if (layer.stateMachine.name == name) return layer.stateMachine;
+                foreach (var subStateMachine in layer.stateMachine.stateMachines)
+                {
+                    if (subStateMachine.stateMachine.name == name) return subStateMachine.stateMachine;
+                }
+            }
+
+            return null;
         }
 
         public static AnimationClip[] GetAnimationClipsFromImporter(string modelImporterPath)

@@ -13,6 +13,7 @@ namespace RedeevEditor.Utilities
         private AnimatorSetterInfo sourceInfo;
         private List<RuntimeAnimatorController> destinations = new();
         private List<Object> animations = new();
+        private Vector2 scrollPosition;
 
         [MenuItem("Tools/Animator Setter")]
         public static void ShowWindow()
@@ -23,6 +24,8 @@ namespace RedeevEditor.Utilities
         private void OnGUI()
         {
             EditorGUILayout.BeginVertical("Helpbox");
+
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
 
             sourceInfo = (AnimatorSetterInfo)EditorGUILayout.ObjectField("Source", sourceInfo, typeof(AnimatorSetterInfo), false);
             DestinationsGUI();
@@ -36,6 +39,7 @@ namespace RedeevEditor.Utilities
             SyncGUI();
 
             AnimationsGUI();
+            EditorGUILayout.EndScrollView();
 
             EditorGUILayout.EndVertical();
         }

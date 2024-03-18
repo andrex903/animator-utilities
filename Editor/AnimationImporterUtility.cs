@@ -37,7 +37,7 @@ namespace RedeevEditor.Utilities
             return obj != null && Path.GetExtension(AssetDatabase.GetAssetPath(obj)) == ".fbx";
         }
 
-        private static void ForEachModelSelected(Action<ModelImporter> callback)
+        public static void ForEachModelSelected(Action<ModelImporter> callback)
         {
             foreach (var obj in Selection.objects)
             {
@@ -68,7 +68,7 @@ namespace RedeevEditor.Utilities
             });
         }
 
-        private static void ForEachClips(ModelImporter modelImporter, Action<ModelImporterClipAnimation> callback)
+        public static void ForEachClips(ModelImporter modelImporter, Action<ModelImporterClipAnimation> callback)
         {
             ModelImporterClipAnimation[] clipAnimations = modelImporter.clipAnimations;
             if (clipAnimations.Length == 0) clipAnimations = modelImporter.defaultClipAnimations;

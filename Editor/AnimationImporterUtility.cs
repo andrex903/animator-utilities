@@ -11,37 +11,44 @@ namespace RedeevEditor.Utilities
     public static class AnimationImporterUtility
     {
         [MenuItem("Assets/Redeev/Animation Importer/Set Names", validate = true)]
-        private static bool SetNamesValidation() => IsSelectionFBX();
+        private static bool SetNamesValidation() => IsSelectionModelImporter();
 
         [MenuItem("Assets/Redeev/Animation Importer/Set Position and Rotation", validate = true)]
-        private static bool SetPositionAndRotationValidation() => IsSelectionFBX();
+        private static bool SetPositionAndRotationValidation() => IsSelectionModelImporter();
 
         [MenuItem("Assets/Redeev/Animation Importer/Set Loops", validate = true)]
-        private static bool SetLoopsValidation() => IsSelectionFBX();
+        private static bool SetLoopsValidation() => IsSelectionModelImporter();
 
         [MenuItem("Assets/Redeev/Animation Importer/Remove Materials", validate = true)]
-        private static bool RemoveMaterialsValidation() => IsSelectionFBX();
+        private static bool RemoveMaterialsValidation() => IsSelectionModelImporter();
 
-        public static bool IsSelectionFBX()
+        public static bool IsSelectionModelImporter()
         {
             if (Selection.objects.Length == 0) return false;
+
             foreach (var obj in Selection.objects)
             {
-                if (!IsFBX(obj)) return false;
+                if (!IsModelImporter(obj)) return false;
             }
+
             return true;
         }
 
-        public static bool IsFBX(UnityEngine.Object obj)
+        public static bool IsModelImporter(UnityEngine.Object obj)
         {
-            return obj != null && Path.GetExtension(AssetDatabase.GetAssetPath(obj)) == ".fbx";
+            if (obj == null) return false;
+
+            string path = AssetDatabase.GetAssetPath(obj);
+            if (string.IsNullOrEmpty(path)) return false;
+            
+            return AssetImporter.GetAtPath(path) is ModelImporter;
         }
 
         public static void ForEachModelSelected(Action<ModelImporter> callback)
         {
             foreach (var obj in Selection.objects)
             {
-                if (IsFBX(obj)) callback?.Invoke((ModelImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(obj)));
+                if (IsModelImporter(obj)) callback?.Invoke((ModelImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(obj)));
             }
         }
 

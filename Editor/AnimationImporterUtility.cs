@@ -100,7 +100,8 @@ namespace RedeevEditor.Utilities
             {
                 ForEachClips(modelImporter, clip =>
                 {
-                    clip.keepOriginalPositionY = true;
+                    clip.keepOriginalPositionY = false;
+                    clip.heightFromFeet = true;
                     clip.keepOriginalPositionXZ = true;
                     clip.keepOriginalOrientation = true;
                     clip.lockRootHeightY = true;
